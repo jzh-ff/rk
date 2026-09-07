@@ -25,6 +25,8 @@ npm run build   # 生产构建
 
 学习数据保存在浏览器 localStorage 中，可随时在「设置」页导出 JSON 备份、换机导入。
 
+**线上地址**：https://jzhm.fun/ruankao/ （发布：`bash scripts/deploy-local.sh`，详见[开发文档](docs/开发文档.md)）
+
 ## 🧰 技术栈
 
 React 18 + TypeScript + Vite · Tailwind CSS v4 · react-router-dom · zustand（persist）· react-markdown
