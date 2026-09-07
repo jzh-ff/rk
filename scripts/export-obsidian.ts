@@ -74,12 +74,12 @@ const EDGES: Record<string, string[]> = {
   'oo-c1': ['oo-c2'],
   'oo-c2': ['oo-c1', 'oo-c4', 'uml1', 'uml2'],
   'oo-c3': ['oo-c4'],
-  'oo-c4': ['oo-c2', 'oo-c3', 'oop1', 'oop2'],
+  'oo-c4': ['oo-c2', 'oo-c3', 'oop1', 'oop2', 'oop-202205'],
   'ds-c1': ['ds-c2'],
   'ds-c2': ['ds-c1', 'algo2'],
   'ds-c3': ['se-c4', 'math-c1', 'algo1'],
   'ds-c4': ['ds-c5'],
-  'ds-c5': ['ds-c4', 'algo1', 'algo2'],
+  'ds-c5': ['ds-c4', 'algo1', 'algo2', 'algo-202205'],
   'pl-c1': ['pl-c2'],
   'pl-c2': ['pl-c1', 'en-c1'],
   'pl-c3': ['co-c1'],
@@ -107,6 +107,8 @@ const CASE_EDGES: Record<string, string[]> = {
   algo2: ['ds-c5', 'ds-c2'],
   oop1: ['oo-c4', 'oo-c3'],
   oop2: ['oo-c4', 'oo-c3'],
+  'algo-202205': ['ds-c5', 'algo2'],
+  'oop-202205': ['oo-c4', 'oop1'],
 }
 
 const HOT_TEXT: Record<number, string> = { 3: '必考', 2: '常考', 1: '了解' }
