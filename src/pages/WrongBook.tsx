@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
 import { MODULES, MODULE_MAP } from '../data/modules'
-import { QUESTION_MAP } from '../data/questions'
+import { useAppStore, findQuestion } from '../store/useAppStore'
 import type { Question } from '../data/types'
-import { useAppStore } from '../store/useAppStore'
 import QuestionCard from '../components/QuestionCard'
 import Markdown from '../components/Markdown'
 
@@ -11,6 +10,7 @@ const LETTERS = ['A', 'B', 'C', 'D']
 export default function WrongBook() {
   const wrongBook = useAppStore((s) => s.wrongBook)
   const clearWrongBook = useAppStore((s) => s.clearWrongBook)
+  const aiQuestions = useAppStore((s) => s.aiQuestions)
   const [filter, setFilter] = useState<string>('all')
   const [mode, setMode] = useState<'list' | 'retry'>('list')
   const [retryIndex, setRetryIndex] = useState(0)
@@ -19,13 +19,13 @@ export default function WrongBook() {
   const wrongQuestions = useMemo(() => {
     const list: { q: Question; wrongCount: number; lastWrongAt: number }[] = []
     for (const item of Object.values(wrongBook)) {
-      const q = QUESTION_MAP[item.questionId]
+      const q = findQuestion(item.questionId, aiQuestions)
       if (q && (filter === 'all' || q.moduleId === filter)) {
         list.push({ q, wrongCount: item.wrongCount, lastWrongAt: item.lastWrongAt })
       }
     }
     return list.sort((a, b) => b.lastWrongAt - a.lastWrongAt)
-  }, [wrongBook, filter])
+  }, [wrongBook, filter, aiQuestions])
 
   const moduleCounts = useMemo(() => {
     const counts = new Map<string, number>()

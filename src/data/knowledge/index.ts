@@ -11,6 +11,8 @@ import { plKnowledge } from './pl'
 import { mathKnowledge } from './math'
 import { lawKnowledge } from './law'
 import { enKnowledge } from './en'
+import { mmKnowledge } from './mm'
+import { archKnowledge } from './arch'
 
 export const KNOWLEDGE: Record<string, ModuleKnowledge> = {
   co: coKnowledge,
@@ -25,4 +27,6 @@ export const KNOWLEDGE: Record<string, ModuleKnowledge> = {
   math: mathKnowledge,
   law: lawKnowledge,
   en: enKnowledge,
+  mm: mmKnowledge,
+  arch: archKnowledge,
 }

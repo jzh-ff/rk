@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAppStore } from '../store/useAppStore'
+import AiAssistant from './AiAssistant'
 
 const NAV = [
   { to: '/', label: '仪表盘', icon: '📊', end: true },
@@ -8,6 +9,7 @@ const NAV = [
   { to: '/practice', label: '章节练习', icon: '✏️' },
   { to: '/mock', label: '整卷模考', icon: '⏱️' },
   { to: '/case', label: '案例分析', icon: '📝' },
+  { to: '/ai-quiz', label: 'AI 出题', icon: '🤖' },
   { to: '/wrong', label: '错题本', icon: '📕' },
   { to: '/settings', label: '设置', icon: '⚙️' },
 ]
@@ -99,6 +101,9 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+
+      {/* 全局 AI 助手 */}
+      <AiAssistant />
     </div>
   )
 }

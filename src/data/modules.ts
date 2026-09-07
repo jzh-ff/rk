@@ -102,6 +102,22 @@ export const MODULES: ModuleConfig[] = [
     examCount: 5,
     order: 12,
   },
+  {
+    id: 'mm',
+    name: '多媒体基础',
+    icon: '🎬',
+    description: '图像容量计算、音频采样定理、视频编码、有损/无损压缩（近年稳定送分题）',
+    examCount: 3,
+    order: 13,
+  },
+  {
+    id: 'arch',
+    name: '软件架构与新技术',
+    icon: '🏛️',
+    description: '架构风格（分层/管道/事件驱动/MVC）、中间件、SOA/微服务、数据仓库、云计算',
+    examCount: 2,
+    order: 14,
+  },
 ]
 
 /** 模块 id → 配置 */

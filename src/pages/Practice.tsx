@@ -21,6 +21,7 @@ export default function Practice() {
   const [random, setRandom] = useState(false)
   const [index, setIndex] = useState(0)
   const records = useAppStore((s) => s.records)
+  const aiQuestions = useAppStore((s) => s.aiQuestions)
 
   const mod = moduleId ? MODULE_MAP[moduleId] : null
 
@@ -30,10 +31,10 @@ export default function Practice() {
 
   const questions = useMemo(() => {
     if (!moduleId) return []
-    let qs = questionsOfModule(moduleId)
+    let qs = [...questionsOfModule(moduleId), ...aiQuestions.filter((q) => q.moduleId === moduleId)]
     if (chapter !== 'all') qs = qs.filter((q) => q.chapter === chapter)
     return random ? shuffle(qs) : qs
-  }, [moduleId, chapter, random])
+  }, [moduleId, chapter, random, aiQuestions])
 
   /* 模块选择视图 */
   if (!mod) {

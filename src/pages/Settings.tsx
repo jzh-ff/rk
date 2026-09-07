@@ -1,15 +1,40 @@
 import { useRef, useState } from 'react'
 import { useAppStore } from '../store/useAppStore'
+import { AI_PRESETS, chatWithAi } from '../services/ai'
 
 export default function Settings() {
   const examDate = useAppStore((s) => s.examDate)
   const setExamDate = useAppStore((s) => s.setExamDate)
   const dailyGoal = useAppStore((s) => s.dailyGoal)
   const setDailyGoal = useAppStore((s) => s.setDailyGoal)
+  const aiConfig = useAppStore((s) => s.aiConfig)
+  const setAiConfig = useAppStore((s) => s.setAiConfig)
+  const aiQuestions = useAppStore((s) => s.aiQuestions)
+  const removeAiQuestion = useAppStore((s) => s.removeAiQuestion)
   const importData = useAppStore((s) => s.importData)
   const clearAllData = useAppStore((s) => s.clearAllData)
   const fileRef = useRef<HTMLInputElement>(null)
   const [msg, setMsg] = useState('')
+  const [testing, setTesting] = useState(false)
+  const [testResult, setTestResult] = useState('')
+
+  const testConnection = async () => {
+    setTesting(true)
+    setTestResult('')
+    try {
+      const reply = await chatWithAi(aiConfig, [{ role: 'user', content: '请只回复两个字：连接成功' }], 30000)
+      setTestResult(`✅ 连接成功，模型回复：${reply.slice(0, 30)}`)
+    } catch (e) {
+      setTestResult(`❌ ${(e as Error).message}`)
+    } finally {
+      setTesting(false)
+    }
+  }
+
+  const applyPreset = (name: string) => {
+    const p = AI_PRESETS.find((x) => x.name === name)
+    if (p) setAiConfig({ baseUrl: p.baseUrl, model: p.model })
+  }
 
   const exportData = () => {
     const s = useAppStore.getState()
@@ -72,6 +97,84 @@ export default function Settings() {
             <span className="text-sm text-slate-400">题/天</span>
           </div>
         </label>
+      </section>
+
+      <section className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
+        <h2 className="font-semibold mb-2">🤖 AI 功能接口（OpenAI 兼容协议）</h2>
+        <p className="text-xs text-slate-400 mb-4">
+          配置后可使用 AI 答疑、AI 深度讲解、AI 智能出题、案例题 AI 评分。Key 仅保存在本机浏览器，不会上传到任何第三方。
+        </p>
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            {AI_PRESETS.map((p) => (
+              <button
+                key={p.name}
+                onClick={() => applyPreset(p.name)}
+                title={p.note}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                  aiConfig.baseUrl === p.baseUrl
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/40 text-primary-600 dark:text-primary-300'
+                    : 'border-slate-200 dark:border-slate-600 hover:border-primary-400'
+                }`}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+          <label className="block text-sm">
+            <span className="text-slate-500 dark:text-slate-400">接口地址 Base URL</span>
+            <input
+              value={aiConfig.baseUrl}
+              onChange={(e) => setAiConfig({ baseUrl: e.target.value })}
+              placeholder="https://open.bigmodel.cn/api/paas/v4"
+              className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="text-slate-500 dark:text-slate-400">模型名称</span>
+            <input
+              value={aiConfig.model}
+              onChange={(e) => setAiConfig({ model: e.target.value })}
+              placeholder="glm-4-flash / deepseek-chat / qwen2.5:7b"
+              className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="text-slate-500 dark:text-slate-400">API Key（Ollama 本地可留空）</span>
+            <input
+              value={aiConfig.apiKey}
+              onChange={(e) => setAiConfig({ apiKey: e.target.value })}
+              type="password"
+              placeholder="sk-…"
+              className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm"
+            />
+          </label>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={testConnection}
+              disabled={testing || !aiConfig.baseUrl || !aiConfig.model}
+              className="px-4 py-2 rounded-lg bg-primary-600 text-white text-sm disabled:opacity-40 hover:bg-primary-700"
+            >
+              {testing ? '测试中…' : '测试连接'}
+            </button>
+            {testResult && <span className={`text-xs ${testResult.startsWith('✅') ? 'text-emerald-600' : 'text-rose-500'}`}>{testResult}</span>}
+          </div>
+        </div>
+        {aiQuestions.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+            <div className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+              已入库 AI 题：{aiQuestions.length} 道（在「章节练习」对应模块中可刷到）
+            </div>
+            <button
+              onClick={() => {
+                if (confirm(`清空全部 ${aiQuestions.length} 道 AI 题？`)) aiQuestions.forEach((q) => removeAiQuestion(q.id))
+              }}
+              className="text-xs text-slate-400 hover:text-rose-500"
+            >
+              清空 AI 题库
+            </button>
+          </div>
+        )}
       </section>
 
       <section className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5">

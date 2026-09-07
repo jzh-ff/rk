@@ -7,6 +7,7 @@ import MockExam from './pages/MockExam'
 import CaseStudy from './pages/CaseStudy'
 import WrongBook from './pages/WrongBook'
 import Settings from './pages/Settings'
+import AiQuiz from './pages/AiQuiz'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="mock" element={<MockExam />} />
         <Route path="case" element={<CaseStudy />} />
         <Route path="wrong" element={<WrongBook />} />
+        <Route path="ai-quiz" element={<AiQuiz />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>

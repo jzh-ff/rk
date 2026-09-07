@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { CaseQuestion } from '../data/types'
 import { CASE_CATEGORY_LABELS } from '../data/types'
+import { useAppStore } from '../store/useAppStore'
+import { chatWithAi, TUTOR_SYSTEM_PROMPT } from '../services/ai'
 import Markdown from './Markdown'
 
 interface Props {
@@ -18,6 +20,38 @@ interface Props {
 
 export default function CaseQuestionCard({ cq, answers, scores, onAnswer, onScore, readOnly, showTechniques }: Props) {
   const [openKeys, setOpenKeys] = useState<Set<string>>(new Set())
+  const [aiReport, setAiReport] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
+  const aiConfig = useAppStore((s) => s.aiConfig)
+
+  const askAiGrade = async () => {
+    setAiLoading(true)
+    setAiError('')
+    setAiReport('')
+    const subs = cq.subQuestions
+      .map(
+        (s, i) =>
+          `【问题${i + 1}】（${s.points} 分）\n题干：${s.stem}\n参考答案：${s.referenceAnswer}\n评分要点：${(s.scoringPoints ?? []).join('；')}\n考生作答：${answers[s.id]?.trim() || '（未作答）'}`,
+      )
+      .join('\n\n')
+    try {
+      const reply = await chatWithAi(aiConfig, [
+        { role: 'system', content: TUTOR_SYSTEM_PROMPT },
+        {
+          role: 'user',
+          content:
+            `请扮演软考软件设计师下午题阅卷老师，为以下「${CASE_CATEGORY_LABELS[cq.category]}」大题评分。\n\n【背景材料】\n${cq.material}\n\n${subs}\n\n` +
+            '评分要求：1）按评分要点逐条对照考生作答，每小题给出得分（0 至满分，可给小数）与扣分原因；2）最后给出总分（满分 15）与总评；3）指出考生答案中"答了但不得分"和"漏答"的关键点；4）给一段提分建议。用 Markdown 输出，结构清晰。',
+        },
+      ])
+      setAiReport(reply)
+    } catch (e) {
+      setAiError((e as Error).message)
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const toggleOpen = (key: string) => {
     setOpenKeys((prev) => {
@@ -113,6 +147,32 @@ export default function CaseQuestionCard({ cq, answers, scores, onAnswer, onScor
           )
         })}
       </div>
+
+      {!readOnly && (
+        <div className="mt-4 border-t border-slate-200 dark:border-slate-700 pt-3">
+          {!aiReport && !aiLoading && (
+            <button
+              onClick={askAiGrade}
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-violet-600 to-primary-600 text-white hover:opacity-90"
+            >
+              🤖 AI 评分本题（按评分要点逐条对照给分）
+            </button>
+          )}
+          {aiLoading && <span className="text-sm text-slate-400">🤖 AI 阅卷中<span className="animate-pulse">…</span>（约 10~30 秒）</span>}
+          {aiError && <div className="text-xs text-rose-500 mt-1">{aiError}</div>}
+          {aiReport && (
+            <div className="rounded-xl bg-gradient-to-br from-violet-50 to-primary-50 dark:from-slate-800 dark:to-slate-800 border border-violet-200 dark:border-violet-900 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-semibold text-violet-700 dark:text-violet-300">🤖 AI 阅卷报告</span>
+                <button onClick={askAiGrade} className="ml-auto text-xs text-slate-400 hover:text-violet-500">
+                  重新评分
+                </button>
+              </div>
+              <Markdown>{aiReport}</Markdown>
+            </div>
+          )}
+        </div>
+      )}
 
       {showTechniques && cq.techniques && (
         <div className="mt-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4">

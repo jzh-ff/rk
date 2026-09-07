@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Question } from '../data/types'
 import { MODULE_MAP } from '../data/modules'
 import { useAppStore } from '../store/useAppStore'
+import { chatWithAi, TUTOR_SYSTEM_PROMPT } from '../services/ai'
 import Markdown from './Markdown'
 
 const LETTERS = ['A', 'B', 'C', 'D']
@@ -19,12 +20,41 @@ interface Props {
 export default function QuestionCard({ question, index, total, onAnswered, wrongMode }: Props) {
   const [selected, setSelected] = useState<number | null>(null)
   const [submitted, setSubmitted] = useState(false)
+  const [aiExplain, setAiExplain] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
   const favorites = useAppStore((s) => s.favorites)
   const toggleFavorite = useAppStore((s) => s.toggleFavorite)
   const addRecord = useAppStore((s) => s.addRecord)
   const removeWrong = useAppStore((s) => s.removeWrong)
+  const aiConfig = useAppStore((s) => s.aiConfig)
   const isFav = favorites.includes(question.id)
   const mod = MODULE_MAP[question.moduleId]
+
+  const askAi = async () => {
+    setAiLoading(true)
+    setAiError('')
+    setAiExplain('')
+    try {
+      const reply = await chatWithAi(aiConfig, [
+        { role: 'system', content: TUTOR_SYSTEM_PROMPT },
+        {
+          role: 'user',
+          content:
+            `请深度讲解这道软考题（模块：${mod?.name}，章节：${question.chapter ?? '综合'}）：\n\n` +
+            `【题干】${question.stem}\n` +
+            `【选项】${question.options.map((o, i) => `${LETTERS[i]}. ${o}`).join('  ')}\n` +
+            `【正确答案】${LETTERS[question.answer]}\n\n` +
+            '请给出：1）这道题考的核心知识点（一句话）；2）比题库解析更通俗的讲解（可打比方）；3）每个错误选项错在哪；4）举一反三：同考点还会怎么考、给一个同类变式题（附答案）。',
+        },
+      ])
+      setAiExplain(reply)
+    } catch (e) {
+      setAiError((e as Error).message)
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const submit = () => {
     if (selected === null || submitted) return
@@ -114,6 +144,29 @@ export default function QuestionCard({ question, index, total, onAnswered, wrong
           </div>
           <div className="text-sm text-slate-500 dark:text-slate-400 mb-1 font-medium">📖 解析</div>
           <Markdown>{question.explanation}</Markdown>
+          <div className="mt-3">
+            {!aiExplain && !aiLoading && (
+              <button
+                onClick={askAi}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-gradient-to-r from-violet-600 to-primary-600 text-white hover:opacity-90"
+              >
+                🤖 AI 深度讲解（通俗版 + 错项分析 + 举一反三）
+              </button>
+            )}
+            {aiLoading && <span className="text-xs text-slate-400">🤖 AI 讲解生成中<span className="animate-pulse">…</span></span>}
+            {aiError && <div className="text-xs text-rose-500 mt-1">{aiError}</div>}
+            {aiExplain && (
+              <div className="rounded-xl bg-gradient-to-br from-violet-50 to-primary-50 dark:from-slate-800 dark:to-slate-800 border border-violet-200 dark:border-violet-900 p-4 mt-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold text-violet-700 dark:text-violet-300">🤖 AI 深度讲解</span>
+                  <button onClick={askAi} className="ml-auto text-[11px] text-slate-400 hover:text-violet-500">
+                    重新生成
+                  </button>
+                </div>
+                <Markdown>{aiExplain}</Markdown>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { QUESTION_MAP } from '../data/questions'
+import type { Question } from '../data/types'
+import type { AiConfig } from '../services/ai'
 
 /** 单次作答记录 */
 export interface AnswerRecord {
@@ -56,6 +58,7 @@ interface AppState {
   examDate: string
   dailyGoal: number
   theme: 'light' | 'dark'
+  aiConfig: AiConfig
   /* 学习数据 */
   records: AnswerRecord[]
   wrongBook: Record<string, WrongItem>
@@ -63,11 +66,16 @@ interface AppState {
   masteredChapters: string[]
   mockHistory: MockResult[]
   activeMock: ActiveMock | null
+  /** 用户认可并收藏进题库的 AI 生成题 */
+  aiQuestions: Question[]
 
   /* actions */
   setExamDate: (d: string) => void
   setDailyGoal: (n: number) => void
   toggleTheme: () => void
+  setAiConfig: (patch: Partial<AiConfig>) => void
+  addAiQuestions: (qs: Question[]) => void
+  removeAiQuestion: (id: string) => void
   addRecord: (r: AnswerRecord) => void
   toggleFavorite: (id: string) => void
   removeWrong: (id: string) => void
@@ -94,6 +102,8 @@ export const useAppStore = create<AppState>()(
       examDate: '2026-10-24',
       dailyGoal: 30,
       theme: 'light',
+      aiConfig: { baseUrl: '', apiKey: '', model: '' },
+      aiQuestions: [],
       records: [],
       wrongBook: {},
       favorites: [],
@@ -104,6 +114,16 @@ export const useAppStore = create<AppState>()(
       setExamDate: (d) => set({ examDate: d }),
       setDailyGoal: (n) => set({ dailyGoal: Math.max(1, Math.min(500, n)) }),
       toggleTheme: () => set((s) => ({ theme: s.theme === 'light' ? 'dark' : 'light' })),
+
+      setAiConfig: (patch) => set((s) => ({ aiConfig: { ...s.aiConfig, ...patch } })),
+
+      addAiQuestions: (qs) =>
+        set((s) => {
+          const existing = new Set(s.aiQuestions.map((q) => q.id))
+          return { aiQuestions: [...qs.filter((q) => !existing.has(q.id)), ...s.aiQuestions].slice(0, 1000) }
+        }),
+
+      removeAiQuestion: (id) => set((s) => ({ aiQuestions: s.aiQuestions.filter((q) => q.id !== id) })),
 
       addRecord: (r) =>
         set((s) => {
@@ -279,6 +299,7 @@ export const useAppStore = create<AppState>()(
           if (Array.isArray(p.favorites)) next.favorites = p.favorites
           if (Array.isArray(p.masteredChapters)) next.masteredChapters = p.masteredChapters
           if (Array.isArray(p.mockHistory)) next.mockHistory = p.mockHistory
+          if (Array.isArray(p.aiQuestions)) next.aiQuestions = p.aiQuestions
           if (typeof p.examDate === 'string') next.examDate = p.examDate
           if (typeof p.dailyGoal === 'number') next.dailyGoal = p.dailyGoal
           set(next)
@@ -301,3 +322,8 @@ export const useAppStore = create<AppState>()(
     { name: 'rk-designer-store' },
   ),
 )
+
+/** 合并查找：静态题库 + 用户收藏的 AI 题 */
+export function findQuestion(id: string, aiQuestions: Question[]): Question | undefined {
+  return QUESTION_MAP[id] ?? aiQuestions.find((q) => q.id === id)
+}

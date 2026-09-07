@@ -11,6 +11,8 @@ import { plQuestions } from './pl'
 import { mathQuestions } from './math'
 import { lawQuestions } from './law'
 import { enQuestions } from './en'
+import { mmQuestions } from './mm'
+import { archQuestions } from './arch'
 
 export const ALL_QUESTIONS: Question[] = [
   ...coQuestions,
@@ -25,6 +27,8 @@ export const ALL_QUESTIONS: Question[] = [
   ...mathQuestions,
   ...lawQuestions,
   ...enQuestions,
+  ...mmQuestions,
+  ...archQuestions,
 ]
 
 export const QUESTION_MAP: Record<string, Question> = Object.fromEntries(
@@ -84,6 +88,8 @@ export const MOCK_QUOTAS: Record<string, number> = {
   math: 3,
   law: 2,
   en: 5,
+  mm: 3,
+  arch: 2,
 }
 
 function shuffle<T>(arr: T[]): T[] {

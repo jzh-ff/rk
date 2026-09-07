@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
 import type { MockResult } from '../store/useAppStore'
-import { QUESTION_MAP } from '../data/questions'
-import { MODULE_MAP, MODULES } from '../data/modules'
+import { useAppStore, findQuestion } from '../store/useAppStore'
+import { MODULE_MAP } from '../data/modules'
 import Markdown from './Markdown'
 
 const LETTERS = ['A', 'B', 'C', 'D']
 
 export default function MockReport({ result }: { result: MockResult }) {
   const [filter, setFilter] = useState<'wrong' | 'all'>('wrong')
+  const aiQuestions = useAppStore((s) => s.aiQuestions)
 
   const moduleStats = useMemo(() => {
     const map = new Map<string, { total: number; correct: number }>()
@@ -25,9 +26,9 @@ export default function MockReport({ result }: { result: MockResult }) {
 
   const details = useMemo(() => {
     return result.morningDetail
-      .map((d) => ({ ...d, q: QUESTION_MAP[d.questionId] }))
+      .map((d) => ({ ...d, q: findQuestion(d.questionId, aiQuestions) }))
       .filter((d) => d.q && (filter === 'all' || !d.correct))
-  }, [result, filter])
+  }, [result, filter, aiQuestions])
 
   const pass = result.morningScore >= 45
   const totalDetail = result.morningDetail.length || 1
