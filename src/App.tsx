@@ -8,6 +8,7 @@ import CaseStudy from './pages/CaseStudy'
 import WrongBook from './pages/WrongBook'
 import Settings from './pages/Settings'
 import AiQuiz from './pages/AiQuiz'
+import Formulas from './pages/Formulas'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="knowledge" element={<Knowledge />} />
         <Route path="knowledge/:moduleId" element={<Knowledge />} />
         <Route path="knowledge/:moduleId/:chapterId" element={<Knowledge />} />
+        <Route path="formulas" element={<Formulas />} />
         <Route path="practice" element={<Practice />} />
         <Route path="mock" element={<MockExam />} />
         <Route path="case" element={<CaseStudy />} />

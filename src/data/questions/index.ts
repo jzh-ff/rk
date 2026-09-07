@@ -13,6 +13,7 @@ import { lawQuestions } from './law'
 import { enQuestions } from './en'
 import { mmQuestions } from './mm'
 import { archQuestions } from './arch'
+import { examQuestions } from './exam'
 
 export const ALL_QUESTIONS: Question[] = [
   ...coQuestions,
@@ -29,6 +30,7 @@ export const ALL_QUESTIONS: Question[] = [
   ...enQuestions,
   ...mmQuestions,
   ...archQuestions,
+  ...examQuestions,
 ]
 
 export const QUESTION_MAP: Record<string, Question> = Object.fromEntries(

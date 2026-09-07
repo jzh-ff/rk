@@ -6,6 +6,7 @@ import AiAssistant from './AiAssistant'
 const NAV = [
   { to: '/', label: '仪表盘', icon: '📊', end: true },
   { to: '/knowledge', label: '知识点', icon: '📚' },
+  { to: '/formulas', label: '公式速查', icon: '📐' },
   { to: '/practice', label: '章节练习', icon: '✏️' },
   { to: '/mock', label: '整卷模考', icon: '⏱️' },
   { to: '/case', label: '案例分析', icon: '📝' },
