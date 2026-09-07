@@ -14,6 +14,8 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<Dashboard />} />
         <Route path="knowledge" element={<Knowledge />} />
+        <Route path="knowledge/:moduleId" element={<Knowledge />} />
+        <Route path="knowledge/:moduleId/:chapterId" element={<Knowledge />} />
         <Route path="practice" element={<Practice />} />
         <Route path="mock" element={<MockExam />} />
         <Route path="case" element={<CaseStudy />} />

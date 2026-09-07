@@ -115,7 +115,7 @@ export default function MockReport({ result }: { result: MockResult }) {
           {details.map((d, i) => (
             <details key={d.questionId} className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
               <summary className="px-4 py-2.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 list-none text-sm">
-                <span className={d.correct ? 'text-emerald-500 font-bold mr-2'>✓</span> : null}
+                {d.correct && <span className="text-emerald-500 font-bold mr-2">✓</span>}
                 {!d.correct && <span className="text-rose-500 font-bold mr-2">✗</span>}
                 <span className="text-slate-600 dark:text-slate-300 line-clamp-1 inline">
                   {d.q!.stem.replace(/\n/g, ' ').slice(0, 60)}…
